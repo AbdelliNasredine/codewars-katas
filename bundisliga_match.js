@@ -14,6 +14,10 @@ function table(results) {
     goals_shot: 0,
     goals_gotten: 0,
     points: 0,
+    same: false,
+    toString: function () {
+      console.log(`${this.name}`);
+    },
   };
 
   for (const line of results) {
@@ -54,11 +58,11 @@ function table(results) {
 
       // Differences of goals (shot vs. gotten)
       // left team
-      lt_obj.goals_shot += left_team_score;
-      lt_obj.goals_gotten -= right_team_score;
+      lt_obj.goals_shot += Number(left_team_score);
+      lt_obj.goals_gotten += Number(right_team_score);
       // right team
-      rt_obj.goals_shot += right_team_score;
-      rt_obj.goals_gotten -= right_team_score;
+      rt_obj.goals_shot += Number(right_team_score);
+      rt_obj.goals_gotten += Number(left_team_score);
 
       if (diff < 0) {
         // right is winner , left loser
@@ -79,29 +83,40 @@ function table(results) {
       }
     }
   }
-  console.log(teams_table);
-  return;
 
-  // organizing into an array
-  const table = [];
-  for (const t in teams) {
-    table.push([
-      t,
-      teams[t].total,
-      teams[t].win,
-      teams[t].lost,
-      teams[t].goals,
-      teams[t].points,
-    ]);
-  }
-
+  // stuck on sorting
   // ordering table
-  table.sort(function (t1, t2) {
+  teams_table.sort(function (t1, t2) {
     // by points
-    if (t1[5] > t2[5]) return -1;
-    else if (t1[5] < t2[5]) return 1;
-    else return 0;
+    if (t1.points > t2.points) return -1;
+    else if (t1.points < t2.points) return 1;
+    else {
+      // by diff in goals
+      const d1 = t1.goals_shot - t1.goals_gotten;
+      const d2 = t2.goals_shot - t2.goals_gotten;
+      if (d1 > d2) return -1;
+      else if (d1 < d2) return 1;
+      else {
+        // by more goals better
+        const g1 = t1.goals_shot + t1.goals_gotten;
+        const g2 = t2.goals_shot + t2.goals_gotten;
+        if (g1 > g2) return -1;
+        else if (g1 < g2) return 1;
+        else {
+          // make them same
+          t1.same = true;
+          t2.same = true;
+          // order by name
+          if (t1.name > t2.name) return -1;
+          else if (t1.name < t2.name) return 1;
+          else return 0;
+        }
+      }
+    }
   });
+
+  teams_table.forEach((t) => t.toString());
+  return;
 
   // const team_formatted = `${t.concat(" ".repeat(30 - t.length))}${
   //   teams[t].total
